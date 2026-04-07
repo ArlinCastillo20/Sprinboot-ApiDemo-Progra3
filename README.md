@@ -51,6 +51,10 @@ Incluye endpoints de saludos, validaciones, manejo de errores, documentación co
 ## Documentacion Swagger:
 http://localhost:8080/swagger-ui/index.html
 
+Ejecucion del Proyecto
+## Compilar
+mvn clean compile
+
 ## Ejecutar pruebas:
 mvn test
 
