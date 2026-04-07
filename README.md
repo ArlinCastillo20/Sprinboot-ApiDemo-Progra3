@@ -1,237 +1,65 @@
-# Workshop Spring Boot 3.x + JDK 17 (Maven)
+# Proyecto Spring Boot - Programación III
 
-Este repositorio es un **tutorial paso a paso** para clase/laboratorio.
-Los estudiantes avanzan descomentando bloques, probando endpoints y completando ejercicios.
+Estudiante:Arlin Guisel Castillo Cermeño 
+Curso: Programación III  
+Universidad Mariano Gálvez de Guatemala  
 
-## Objetivo del taller
+## Descripción
+Proyecto API REST desarrollado con Spring Boot como parte del laboratorio de Programación III.  
+Incluye endpoints de saludos, validaciones, manejo de errores, documentación con Swagger/OpenAPI y un endpoint desafiante para simulación de préstamo.
 
-- Practicar arquitectura basica de API REST con Spring Boot.
-- Aplicar validaciones con `jakarta.validation`.
-- Manejar errores de forma global.
-- Documentar la API con Swagger/OpenAPI.
-- Implementar un endpoint de negocio mas desafiante.
+## Tecnologías utilizadas
+- Java 17
+- Spring Boot 3.3.5
+- Maven
+- Swagger / OpenAPI
+- JUnit 5
+- MockMvc
 
----
+## Funcionalidades implementadas
 
-## 0) Requisitos
+### API base
+- `GET /api/v1`
 
-- Java `17`
-- Maven `3.9+`
+### Endpoints de saludos
+- `GET /api/v1/saludos?nombre=Ana`
+- `POST /api/v1/saludos`
 
-Verifica Java:
+### Validaciones
+- Validación de nombre obligatorio
+- Manejo de errores de validación
+- Manejo de reglas de negocio
 
-```bash
-java -version
-```
+### Endpoint desafiante
+- `POST /api/v1/simulaciones/prestamo`
 
-Debe mostrar `17.x`.
-
-Si usas macOS y necesitas cambiar Java temporalmente:
-
-```bash
-export JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home
-export PATH=$JAVA_HOME/bin:$PATH
-```
-
----
-
-## 1) Comando para generar el proyecto Spring Boot
-
-Este comando usa Spring Initializr y genera un proyecto Maven con Java 17 y Spring Boot 3.x:
-
-```bash
-curl https://start.spring.io/starter.zip \
-  -d type=maven-project \
-  -d language=java \
-  -d bootVersion=3.3.5 \
-  -d groupId=com.ejemplo \
-  -d artifactId=springboot-api-demo \
-  -d name=springboot-api-demo \
-  -d packageName=com.ejemplo.demo \
-  -d javaVersion=17 \
-  -d dependencies=web,validation \
-  -o springboot-api-demo.zip
-```
-
-```bash
-unzip springboot-api-demo.zip -d .
-cd springboot-api-demo
-```
-
----
-
-## 2) Paso a paso del taller
-
-### Paso 1 - Ejecutar base del proyecto
-
-```bash
-mvn spring-boot:run
-```
-
-Probar endpoint base:
-
-```bash
-curl http://localhost:8080/api/v1
-```
-
-Respuesta esperada:
-
-```json
+## Ejemplo de request para Prestamo
 {
-  "estado": "ok",
-  "mensaje": "Workshop Spring Boot activo"
+  "monto": 10000,
+  "tasaAnual": 12,
+  "meses": 12
 }
-```
 
-### Paso 2 - Habilitar endpoint GET de saludos
+##Ejemplo de respuesta para prestamo:
+{
+  "cuotaMensual": 888.49,
+  "interesTotal": 661.88,
+  "totalPagar": 10661.88
+}
 
-En `src/main/java/com/ejemplo/demo/api/controller/SaludoController.java`:
 
-- Descomentar bloque `PASO 2`.
-- Descomentar imports indicados.
-- Descomentar inyeccion de `SaludoService`.
-- Descomentar endpoint `@GetMapping("/saludos")`.
+## Documentacion Swagger:
+http://localhost:8080/swagger-ui/index.html
 
-Probar:
-
-```bash
-curl "http://localhost:8080/api/v1/saludos?nombre=Ana"
-```
-
-### Paso 3 - Habilitar endpoint POST con validacion
-
-En `SaludoController`:
-
-- Descomentar bloque `PASO 3`.
-- Descomentar imports (`@PostMapping`, `@RequestBody`, `@Valid`, `SaludoRequest`).
-
-Probar caso correcto:
-
-```bash
-curl -X POST http://localhost:8080/api/v1/saludos \
-  -H "Content-Type: application/json" \
-  -d '{"nombre":"Ana"}'
-```
-
-Probar caso invalido:
-
-```bash
-curl -X POST http://localhost:8080/api/v1/saludos \
-  -H "Content-Type: application/json" \
-  -d '{"nombre":""}'
-```
-
-Debe responder `400` en el caso invalido.
-
-### Paso 4 - Ejercicio de logica de negocio
-
-En `src/main/java/com/ejemplo/demo/domain/service/SaludoService.java`:
-
-- Completar logica del metodo `normalizarNombre`.
-- Recomendaciones:
-  - Quitar espacios al inicio/final.
-  - Convertir primera letra a mayuscula.
-  - Validar reglas de negocio (opcional).
-
-### Paso 5 - Manejo de errores de negocio
-
-En `src/main/java/com/ejemplo/demo/api/exception/GlobalExceptionHandler.java`:
-
-- Descomentar bloque `PASO 5`.
-- Ajustar respuesta para `IllegalArgumentException`.
-
-Objetivo: si hay error de negocio, responder `400` con codigo `BUSINESS_RULE_ERROR`.
-
-### Paso 6 - Completar pruebas
-
-En `src/test/java/com/ejemplo/demo/api/controller/SaludoControllerTest.java`:
-
-- Completar bloque `PASO 6`.
-- Agregar pruebas para:
-  - GET `/api/v1/saludos`
-  - POST invalido con validacion
-
-Ejecutar:
-
-```bash
+## Ejecutar pruebas:
 mvn test
-```
 
-### Paso 7 - Documentar API con Swagger/OpenAPI
+## Levantar Aplicacion:
+mvn spring-boot:run
 
-Objetivo: exponer y probar endpoints desde UI de documentacion.
-
-1. Agregar dependencia en `pom.xml`:
-
-```xml
-<dependency>
-  <groupId>org.springdoc</groupId>
-  <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-  <version>2.6.0</version>
-</dependency>
-```
-
-2. Levantar proyecto y abrir:
-
-- `http://localhost:8080/swagger-ui/index.html`
-- `http://localhost:8080/v3/api-docs`
-
-3. Agregar metadata (recomendado):
-
-- Titulo
-- Version
-- Descripcion
-- Contacto
-
-### Paso 8 - Crear endpoint desafiante (obligatorio)
-
-Implementar un endpoint mas real que un saludo.
-
-#### Opcion sugerida: Simulador de Prestamo
-
-- Endpoint: `POST /api/v1/simulaciones/prestamo`
-- Request:
-  - `monto` (BigDecimal, > 0)
-  - `tasaAnual` (BigDecimal, > 0)
-  - `meses` (int, entre 1 y 360)
-- Response:
-  - `cuotaMensual`
-  - `interesTotal`
-  - `totalPagar`
-
-Requisitos:
-
-- Validar datos de entrada con `jakarta.validation`.
-- Implementar logica en una clase de servicio.
-- Manejar errores de negocio en `GlobalExceptionHandler`.
-- Documentar endpoint en Swagger.
-- Crear al menos 2 pruebas:
-  - caso exitoso
-  - caso invalido
-
-Formula sugerida (cuota fija):
-
-```text
-cuota = P * (r * (1 + r)^n) / ((1 + r)^n - 1)
-```
-
-Donde:
-
-- `P` = monto
-- `r` = tasa mensual (`tasaAnual / 12 / 100`)
-- `n` = numero de meses
-
----
-
-## Checklist final
-
-- [ ] Proyecto corre en local
-- [ ] GET `/api/v1` responde OK
-- [ ] GET `/api/v1/saludos` habilitado
-- [ ] POST `/api/v1/saludos` habilitado y validando
-- [ ] Reglas de negocio implementadas
-- [ ] Manejo de errores de negocio implementado
-- [ ] Swagger/OpenAPI habilitado y accesible
-- [ ] Endpoint nuevo implementado
-- [ ] Tests del endpoint nuevo en verde
-- [ ] Pruebas pasando (`mvn test`)
+## Pruebas realizadas
+Compilación correcta con Maven
+Ejecución de pruebas con BUILD SUCCESS
+Pruebas de endpoints en navegador, CMD y Swagger
+Validación de errores controlados
+Simulación de préstamo funcionando correctamente
