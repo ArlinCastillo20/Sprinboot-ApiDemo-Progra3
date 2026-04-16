@@ -1,0 +1,93 @@
+package com.ejemplo.demo.domain.service;
+
+import com.ejemplo.demo.api.dto.ProductoRequest;
+import com.ejemplo.demo.api.dto.ProductoResponse;
+import com.ejemplo.demo.domain.exception.ResourceNotFoundException;
+import com.ejemplo.demo.domain.model.Categoria;
+import com.ejemplo.demo.domain.model.Producto;
+import com.ejemplo.demo.domain.repository.CategoriaRepository;
+import com.ejemplo.demo.domain.repository.ProductoRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+public class ProductoService {
+
+    private final ProductoRepository productoRepository;
+    private final CategoriaRepository categoriaRepository;
+
+    public ProductoService(ProductoRepository productoRepository, CategoriaRepository categoriaRepository) {
+        this.productoRepository = productoRepository;
+        this.categoriaRepository = categoriaRepository;
+    }
+
+    @Transactional
+    public ProductoResponse crear(ProductoRequest request) {
+        if (productoRepository.existsBySkuIgnoreCase(request.sku())) {
+            throw new IllegalArgumentException("Ya existe un producto con ese SKU");
+        }
+
+        Categoria categoria = categoriaRepository.findById(request.categoriaId())
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria no encontrada"));
+
+        Producto producto = new Producto();
+        producto.setNombre(request.nombre().trim());
+        producto.setSku(request.sku().trim());
+        producto.setPrecio(request.precio());
+        producto.setStock(request.stock());
+        producto.setCategoria(categoria);
+
+        return toResponse(productoRepository.save(producto));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductoResponse> listar() {
+        return productoRepository.findAll().stream().map(this::toResponse).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public ProductoResponse obtenerPorId(Long id) {
+        Producto producto = productoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
+        return toResponse(producto);
+    }
+
+    @Transactional
+    public ProductoResponse actualizar(Long id, ProductoRequest request) {
+        Producto producto = productoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
+
+        Categoria categoria = categoriaRepository.findById(request.categoriaId())
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria no encontrada"));
+
+        producto.setNombre(request.nombre().trim());
+        producto.setSku(request.sku().trim());
+        producto.setPrecio(request.precio());
+        producto.setStock(request.stock());
+        producto.setCategoria(categoria);
+
+        return toResponse(productoRepository.save(producto));
+    }
+
+    @Transactional
+    public void eliminar(Long id) {
+        Producto producto = productoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
+        productoRepository.delete(producto);
+    }
+
+    private ProductoResponse toResponse(Producto producto) {
+        return new ProductoResponse(
+                producto.getId(),
+                producto.getNombre(),
+                producto.getSku(),
+                producto.getPrecio(),
+                producto.getStock(),
+                producto.getCategoria().getId(),
+                producto.getCategoria().getNombre(),
+                producto.getCreadoEn()
+        );
+    }
+}
