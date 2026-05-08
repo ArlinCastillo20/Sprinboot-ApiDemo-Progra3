@@ -1,0 +1,278 @@
+openapi: 3.0.3
+info:
+  title: Spring Boot API Demo
+  version: 1.0.0
+  description: Contrato OpenAPI contract-first del proyecto
+
+servers:
+  - url: http://localhost:8080
+
+tags:
+  - name: workshop
+  - name: simulaciones
+  - name: demo-estado
+
+paths:
+  /api/v1:
+    get:
+      tags:
+        - workshop
+      operationId: getWorkshopHealth
+      summary: Health del workshop
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /api/v1/saludos:
+    get:
+      tags:
+        - workshop
+      operationId: saludarPorGet
+      summary: Saludar por GET
+      parameters:
+        - name: nombre
+          in: query
+          required: false
+          schema:
+            type: string
+            default: Mundo
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaludoResponse'
+
+    post:
+      tags:
+        - workshop
+      operationId: saludarPorPost
+      summary: Saludar por POST
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaludoRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaludoResponse'
+        '400':
+          description: Error de validacion o negocio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/simulaciones/prestamo:
+    post:
+      tags:
+        - simulaciones
+      operationId: simularPrestamo
+      summary: Simular prestamo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrestamoRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrestamoResponse'
+        '400':
+          description: Error de validacion o negocio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/demo/estado/singleton/{valor}:
+    post:
+      tags:
+        - demo-estado
+      operationId: actualizarSingleton
+      summary: Actualizar singleton
+      parameters:
+        - name: valor
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstadoDemoResponse'
+
+  /api/v1/demo/estado/singleton:
+    get:
+      tags:
+        - demo-estado
+      operationId: obtenerSingleton
+      summary: Obtener singleton
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstadoDemoResponse'
+
+  /api/v1/demo/estado/singleton/reset:
+    post:
+      tags:
+        - demo-estado
+      operationId: reiniciarSingleton
+      summary: Reiniciar singleton
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstadoDemoResponse'
+
+  /api/v1/demo/estado/manual/{valor}:
+    post:
+      tags:
+        - demo-estado
+      operationId: actualizarManual
+      summary: Actualizar manual
+      parameters:
+        - name: valor
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstadoDemoResponse'
+
+  /api/v1/demo/estado/manual:
+    get:
+      tags:
+        - demo-estado
+      operationId: obtenerManual
+      summary: Obtener manual
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstadoDemoResponse'
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        estado:
+          type: string
+        mensaje:
+          type: string
+      required:
+        - estado
+        - mensaje
+
+    SaludoRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+      required:
+        - nombre
+
+    SaludoResponse:
+      type: object
+      properties:
+        mensaje:
+          type: string
+      required:
+        - mensaje
+
+    PrestamoRequest:
+      type: object
+      properties:
+        monto:
+          type: number
+          format: double
+        tasaAnual:
+          type: number
+          format: double
+        meses:
+          type: integer
+          format: int32
+      required:
+        - monto
+        - tasaAnual
+        - meses
+
+    PrestamoResponse:
+      type: object
+      properties:
+        cuotaMensual:
+          type: number
+          format: double
+        interesTotal:
+          type: number
+          format: double
+        totalPagar:
+          type: number
+          format: double
+      required:
+        - cuotaMensual
+        - interesTotal
+        - totalPagar
+
+    EstadoDemoResponse:
+      type: object
+      properties:
+        tipo:
+          type: string
+        valorActual:
+          type: integer
+          format: int32
+      required:
+        - tipo
+        - valorActual
+
+    ErrorResponse:
+      type: object
+      properties:
+        codigo:
+          type: string
+        mensaje:
+          type: string
+        timestamp:
+          type: string
+        detalles:
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - codigo
+        - mensaje
+        - timestamp
+        - detalles
